@@ -100,6 +100,7 @@ public class ColorPickerDialog extends DialogFragment implements ColorPickerView
   static final int ALPHA_THRESHOLD = 165;
 
   private static final String ARG_ID = "id";
+  private static final String ARG_STYLERES = "styleres";
   private static final String ARG_TYPE = "dialogType";
   private static final String ARG_COLOR = "color";
   private static final String ARG_ALPHA = "alpha";
@@ -121,6 +122,7 @@ public class ColorPickerDialog extends DialogFragment implements ColorPickerView
   int dialogId;
   boolean showColorShades;
   int colorShape;
+  int styleRes;
 
   // -- PRESETS --------------------------
   ColorPaletteAdapter adapter;
@@ -161,6 +163,7 @@ public class ColorPickerDialog extends DialogFragment implements ColorPickerView
 
   @Override public Dialog onCreateDialog(Bundle savedInstanceState) {
     dialogId = getArguments().getInt(ARG_ID);
+    styleRes = getArguments().getInt(ARG_STYLERES);
     showAlphaSlider = getArguments().getBoolean(ARG_ALPHA);
     showColorShades = getArguments().getBoolean(ARG_SHOW_COLOR_SHADES);
     colorShape = getArguments().getInt(ARG_COLOR_SHAPE);
@@ -184,12 +187,24 @@ public class ColorPickerDialog extends DialogFragment implements ColorPickerView
       selectedButtonStringRes = R.string.cpv_select;
     }
 
-    AlertDialog.Builder builder = new AlertDialog.Builder(requireActivity()).setView(rootView)
-        .setPositiveButton(selectedButtonStringRes, new DialogInterface.OnClickListener() {
-          @Override public void onClick(DialogInterface dialog, int which) {
-            onColorSelected(color);
-          }
-        });
+    AlertDialog.Builder builder;
+    if(styleRes != 0) {
+      builder = new AlertDialog.Builder(requireActivity(), styleRes).setView(rootView)
+              .setPositiveButton(selectedButtonStringRes, new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                  onColorSelected(color);
+                }
+              });
+    } else {
+      builder = new AlertDialog.Builder(requireActivity()).setView(rootView)
+              .setPositiveButton(selectedButtonStringRes, new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                  onColorSelected(color);
+                }
+              });
+    }
 
     int dialogTitleStringRes = getArguments().getInt(ARG_DIALOG_TITLE);
     if (dialogTitleStringRes != 0) {
@@ -748,6 +763,7 @@ public class ColorPickerDialog extends DialogFragment implements ColorPickerView
     int[] presets = MATERIAL_COLORS;
     @ColorInt int color = Color.BLACK;
     int dialogId = 0;
+    int styleRes = 0;
     boolean showAlphaSlider = false;
     boolean allowPresets = true;
     boolean allowCustom = true;
@@ -847,6 +863,14 @@ public class ColorPickerDialog extends DialogFragment implements ColorPickerView
     }
 
     /**
+     * Set the dialog style
+     */
+    public Builder setDialogStyle(int dialogStyleRes) {
+      this.styleRes = dialogStyleRes;
+      return this;
+    }
+
+    /**
      * Show the alpha slider
      *
      * @param showAlphaSlider {@code true} to show the alpha slider. Currently only supported with the {@link
@@ -912,6 +936,7 @@ public class ColorPickerDialog extends DialogFragment implements ColorPickerView
       ColorPickerDialog dialog = new ColorPickerDialog();
       Bundle args = new Bundle();
       args.putInt(ARG_ID, dialogId);
+      args.putInt(ARG_STYLERES, styleRes);
       args.putInt(ARG_TYPE, dialogType);
       args.putInt(ARG_COLOR, color);
       args.putIntArray(ARG_PRESETS, presets);
